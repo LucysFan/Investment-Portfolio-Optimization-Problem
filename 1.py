@@ -36,10 +36,10 @@ else:
     q1 = restrain(data[0], 1)
     q2 = restrain(data[1] ** 2, 0.04)
     asss = []
-    for c1 in range(-50, 51):
-        for c2 in range(-50, 51):
-            qubo = -q0 + c1 / 10 * q1 + c2 / 10 * q2
-            vec = pq.solve(qubo.tocoo(), number_of_runs=1, number_of_steps=100, return_samples=False).vector
+    for c1 in range(500):
+        for c2 in range(500):
+            qubo = -q0 - c1 * q1 - c2 * q2
+            vec = pq.solve(qubo.tocoo(), number_of_runs=10, number_of_steps=10000, return_samples=False).vector
             ass = []
             for i in range(data.shape[1]):
                 a = 0
@@ -47,6 +47,6 @@ else:
                     a += vec[i * m + j] / 2 ** j
                 ass.append(a)
             asss.append((abs(sum(ass) - 1) + abs(np.sum(data[1] ** 2 * np.array(ass)) ** 0.5 - 0.2) * 5, c1, c2))
-    print(min(asss))
+    print(min(asss, key=lambda x: x[0]))
 #print(f'Покупаем {a * 100}% акций {sts[i]}. Прибыль {data[0, i] * a * 100}%, риск {data[1, i] * a}')
 #print(f'Общий риск портфеля: {d}')
