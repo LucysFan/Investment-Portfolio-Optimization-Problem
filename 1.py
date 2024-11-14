@@ -28,7 +28,6 @@ if data[1, ti] < 0.2:
     print(f'Ожидаемая доходность: {data[0, ti]}')
     print(f'Уровень риска: {data[1, ti]}')
 else:
-
     diags = [data[0, i] for i in range(data.shape[1])]
     for i in range(data.shape[1]):
         for j in range(m):
@@ -37,18 +36,17 @@ else:
     q1 = restrain(data[0], 1)
     q2 = restrain(data[1] ** 2, 0.04)
     asss = []
-    for c1 in range(-1000, 1001):
-        for c2 in range(-1000, 1001):
-            qubo = -q0 + c1 / 100 * q1 + c2 / 100 * q2
-            vec = pq.solve(qubo.tocoo(), number_of_runs=5, number_of_steps=100, return_samples=False).vector
+    for c1 in range(-50, 51):
+        for c2 in range(-50, 51):
+            qubo = -q0 + c1 / 10 * q1 + c2 / 10 * q2
+            vec = pq.solve(qubo.tocoo(), number_of_runs=1, number_of_steps=100, return_samples=False).vector
             ass = []
             for i in range(data.shape[1]):
                 a = 0
                 for j in range(m):
                     a += vec[i * m + j] / 2 ** j
                 ass.append(a)
-            asss.append(abs((sum(ass) - 1)) > 1 / 2 ** (m - 3) + abs(np.sum((data[1] ** 2 * np.array(ass))) ** 0.5 - 0.2) > + 1 / 2 ** (m - 3))
-            if c1 > 1:
-                print(min(asss))
-                #print(f'Покупаем {a * 100}% акций {sts[i]}. Прибыль {data[0, i] * a * 100}%, риск {data[1, i] * a}')
-                #print(f'Общий риск портфеля: {d}')
+            asss.append((abs(sum(ass) - 1) + abs(np.sum(data[1] ** 2 * np.array(ass)) ** 0.5 - 0.2) * 5, c1, c2))
+    print(min(asss))
+#print(f'Покупаем {a * 100}% акций {sts[i]}. Прибыль {data[0, i] * a * 100}%, риск {data[1, i] * a}')
+#print(f'Общий риск портфеля: {d}')
