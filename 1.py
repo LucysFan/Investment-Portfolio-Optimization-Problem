@@ -33,12 +33,22 @@ else:
     for i in range(data.shape[1]):
         for j in range(m):
             diags.append((data[0, i] / 2 ** j))
-
-    qubo = -sp.dia_matrix((diags, 0), shape=[data.shape[1] * m] * 2).tocoo() + restrain(data[0], 1) + restrain(data[1] ** 2, 0.04)
-    vec = pq.solve(qubo.tocoo(), no).vector
-    for i in range(data.shape[1]):
-        a = 0
-        for j in range(m):
-            a += vec[i * m + j] / 2 ** j
-        if a > 0:
-            print(f'Покупаем {a * 100}% акций {sts[i]}. Прибыль {data[0, i] * a * 100}%, риск {data[1, i] * a}')
+    q0 = sp.dia_matrix((diags, 0), shape=[data.shape[1] * m] * 2).tocoo()
+    q1 = restrain(data[0], 1)
+    q2 = restrain(data[1] ** 2, 0.04)
+    asss = []
+    for c1 in range(-1000, 1001):
+        for c2 in range(-1000, 1001):
+            qubo = -q0 + c1 / 100 * q1 + c2 / 100 * q2
+            vec = pq.solve(qubo.tocoo(), number_of_runs=5, number_of_steps=100, return_samples=False).vector
+            ass = []
+            for i in range(data.shape[1]):
+                a = 0
+                for j in range(m):
+                    a += vec[i * m + j] / 2 ** j
+                ass.append(a)
+            asss.append(abs((sum(ass) - 1)) > 1 / 2 ** (m - 3) + abs(np.sum((data[1] ** 2 * np.array(ass))) ** 0.5 - 0.2) > + 1 / 2 ** (m - 3))
+            if c1 > 1:
+                print(min(asss))
+                #print(f'Покупаем {a * 100}% акций {sts[i]}. Прибыль {data[0, i] * a * 100}%, риск {data[1, i] * a}')
+                #print(f'Общий риск портфеля: {d}')
