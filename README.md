@@ -1,2 +1,2 @@
-# Investment-Portgolio-Optimization-Problem
+# Investment-Portfolio-Optimization-Problem
 .|.
